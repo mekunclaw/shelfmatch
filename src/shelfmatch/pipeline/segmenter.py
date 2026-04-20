@@ -17,6 +17,16 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Import SAM2 components at module level for visibility across all methods
+try:
+    from sam2.build_sam import build_sam2
+    from sam2.automatic_mask_generator import SAM2AutomaticMaskGenerator
+    _SAM2_AVAILABLE = True
+except ImportError:
+    _SAM2_AVAILABLE = False
+    build_sam2 = None
+    SAM2AutomaticMaskGenerator = None
+
 
 @dataclass
 class MaskResult:
@@ -45,7 +55,7 @@ class SAM2Segmenter:
 
     def __init__(
         self,
-        model_id: str = "sam2.1_hiera_small",
+        model_id: str = "sam2_hiera_small",
         device: Optional[str] = None,
     ):
         self.model_id = model_id
@@ -56,14 +66,11 @@ class SAM2Segmenter:
     def _load_model(self):
         if self._model is not None:
             return
-        try:
-            from sam2.build_sam import build_sam2
-            from sam2.automatic_mask_generator import SAM2AutomaticMaskGenerator
-        except ImportError as e:
+        if not _SAM2_AVAILABLE:
             raise RuntimeError(
                 "SAM2 not installed. Run: pip install 'sam2>=1.0.0' "
                 "or see https://github.com/facebookresearch/sam2"
-            ) from e
+            )
 
         logger.info("Loading SAM2: %s", self.model_id)
 
@@ -72,11 +79,14 @@ class SAM2Segmenter:
         sam2_cfg = {
             "facebook/sam2.1-hiera-base": ("sam2.1_hiera_b+.yaml", "sam2.1_hiera_base_plus.pt"),
             "facebook/sam2.1-hiera-large": ("sam2.1_hiera_l.yaml", "sam2.1_hiera_large.pt"),
-            "facebook/sam2.1-hiera-small": ("sam2_hiera_s.yaml", "sam2.1_hiera_small.pt"),
+            "facebook/sam2.1-hiera-small": ("sam2.1_hiera_s.yaml", "sam2.1_hiera_small.pt"),
             "facebook/sam2.1-hiera-tiny": ("sam2.1_hiera_t.yaml", "sam2.1_hiera_tiny.pt"),
-            # Short aliases — config names use sam2 prefix (not sam2.1) per installed files
-            "sam2.1_hiera_small": ("sam2_hiera_s.yaml", "sam2.1_hiera_small.pt"),
+            # Short aliases — sam2.1 uses v2.1 checkpoints + configs from configs/sam2.1/
+            "sam2.1_hiera_small": ("sam2.1_hiera_s.yaml", "sam2.1_hiera_small.pt"),
             "sam2.1_hiera_base": ("sam2.1_hiera_b+.yaml", "sam2.1_hiera_base_plus.pt"),
+            # v1.x aliases — sam2 library + facebook/sam2-hiera-small checkpoint
+            "sam2_hiera_small": ("sam2_hiera_s.yaml", "sam2_hiera_small.pt"),
+            "sam2_hiera_base": ("sam2_hiera_b+.yaml", "sam2_hiera_base_plus.pt"),
         }
 
         if self.model_id not in sam2_cfg:
@@ -123,6 +133,7 @@ class SAM2Segmenter:
         from sam2.sam2_image_predictor import SAM2ImagePredictor
         predictor = SAM2ImagePredictor(self._model)
         np_img = np.array(image)[:, :, ::-1]  # RGB → BGR for SAM2
+        np_img = np.ascontiguousarray(np_img)
 
         with torch.no_grad():
             predictor.set_image(np_img)
@@ -160,6 +171,7 @@ class SAM2Segmenter:
         w, h = image.size
 
         np_img = np.array(image)[:, :, ::-1]
+        np_img = np.ascontiguousarray(np_img)
         mask_generator = SAM2AutomaticMaskGenerator(
             self._model,
             min_mask_area=min_area,
@@ -230,6 +242,7 @@ class HQSAMSegmenter:
         y2 = int(bbox[3] * h)
 
         np_img = np.array(image)[:, :, ::-1]
+        np_img = np.ascontiguousarray(np_img)
         self._predictor.set_image(np_img)
 
         masks, scores, _ = self._predictor.predict_box(
