@@ -184,7 +184,7 @@ class OWLv2Detector:
         outputs = self._model(**inputs)
 
         target_sizes = torch.tensor([[h, w]], device=self.device)
-        results = self._processor.post_process_object_detection(
+        results = self._processor.post_process_grounded_object_detection(
             outputs,
             target_sizes=target_sizes,
             threshold=self.score_threshold,

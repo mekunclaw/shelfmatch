@@ -45,8 +45,8 @@ class MatchResult:
     product_name: str
     similarity: float  # cosine similarity
     detected_bbox: np.ndarray
-    segmentation_mask: Optional[np.ndarray] = None
     confidence: str  # "high", "medium", "low"
+    segmentation_mask: Optional[np.ndarray] = None
 
 
 class FeatureExtractor:
@@ -102,15 +102,23 @@ class FeatureExtractor:
 
         with torch.no_grad():
             if self.model_type == "siglip":
-                # SigLIP outputs logits per image-text pair; we want image features
+                # SigLIP with AutoModel: get_image_features() returns ImageEmbeddings
                 image_embeds = self._model.get_image_features(**inputs)
+                # It may be a ModelOutput or tensor depending on version
+                if hasattr(image_embeds, 'image_embeds'):
+                    feat_tensor = image_embeds.image_embeds
+                elif hasattr(image_embeds, 'pooler_output'):
+                    feat_tensor = image_embeds.pooler_output
+                else:
+                    # Fallback: detach whatever we have
+                    feat_tensor = torch.tensor(image_embeds) if not isinstance(image_embeds, torch.Tensor) else image_embeds
             else:  # dinov2
-                image_embeds = self._model(**inputs).last_hidden_state
-                # Average pool all patches
-                image_embeds = image_embeds.mean(dim=1)
+                outputs = self._model(**inputs)
+                last_hidden = outputs.last_hidden_state if hasattr(outputs, 'last_hidden_state') else outputs[0]
+                feat_tensor = last_hidden.mean(dim=1)
 
-        # L2 normalize
-        feat = image_embeds.cpu().numpy()
+        # L2 normalize — detach and move to CPU first for safety
+        feat = feat_tensor.detach().cpu().numpy()
         feat = feat / np.linalg.norm(feat, axis=1, keepdims=True)
         return feat[0]
 
