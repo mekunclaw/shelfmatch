@@ -45,7 +45,7 @@ class SAM2Segmenter:
 
     def __init__(
         self,
-        model_id: str = "facebook/sam2.1-hiera-base",
+        model_id: str = "sam2.1_hiera_small",
         device: Optional[str] = None,
     ):
         self.model_id = model_id
@@ -68,11 +68,15 @@ class SAM2Segmenter:
         logger.info("Loading SAM2: %s", self.model_id)
 
         # Build model — SAM2 uses .yaml config + checkpoint
-        # Map model_id to checkpoint path
+        # Map model_id to (yaml_config, checkpoint_filename)
         sam2_cfg = {
-            "facebook/sam2.1-hiera-base": ("sam2.1_hiera_base.yaml", "sam2.1_hiera_base.pt"),
+            "facebook/sam2.1-hiera-base": ("sam2.1_hiera_b+.yaml", "sam2.1_hiera_base_plus.pt"),
             "facebook/sam2.1-hiera-large": ("sam2.1_hiera_large.yaml", "sam2.1_hiera_large.pt"),
-            "facebook/sam2.1-hiera-small": ("sam2.1_hiera_small.yaml", "sam2.1_hiera_small.pt"),
+            "facebook/sam2.1-hiera-small": ("sam2.1_hiera_s.yaml", "sam2.1_hiera_small.pt"),
+            "facebook/sam2.1-hiera-tiny": ("sam2.1_hiera_t.yaml", "sam2.1_hiera_tiny.pt"),
+            # Short aliases
+            "sam2.1_hiera_small": ("sam2.1_hiera_s.yaml", "sam2.1_hiera_small.pt"),
+            "sam2.1_hiera_base": ("sam2.1_hiera_b+.yaml", "sam2.1_hiera_base_plus.pt"),
         }
 
         if self.model_id not in sam2_cfg:
