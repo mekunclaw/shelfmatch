@@ -37,11 +37,11 @@ class DetectionOutput:
 class GroundingDINODetector:
     """Zero-shot detection via Grounding DINO + text prompts."""
 
-    MODEL_ID = "IDEA-OpenNLP/grounding-dino-base"
+    MODEL_ID = "IDEA-Research/grounding-dino-base"
 
     def __init__(
         self,
-        model_id: str = "IDEA-OpenNLP/grounding-dino-base",
+        model_id: str = "IDEA-Research/grounding-dino-base",
         device: Optional[str] = None,
         box_threshold: float = 0.35,
         text_threshold: float = 0.25,
@@ -89,11 +89,11 @@ class GroundingDINODetector:
 
         outputs = self._model(**inputs)
 
-        results = self._processor.post_process_grounded_objects(
+        results = self._processor.post_process_grounded_object_detection(
             outputs,
             target_sizes=[(h, w)],
+            threshold=self.box_threshold,
             text_threshold=self.text_threshold,
-            box_threshold=self.box_threshold,
         )[0]
 
         detections = []

@@ -58,7 +58,7 @@ class SAM2Segmenter:
             return
         try:
             from sam2.build_sam import build_sam2
-            from sam2.automatic_mask_generation import SAM2AutomaticMaskGenerator
+            from sam2.automatic_mask_generator import SAM2AutomaticMaskGenerator
         except ImportError as e:
             raise RuntimeError(
                 "SAM2 not installed. Run: pip install 'sam2>=1.0.0' "
@@ -71,11 +71,11 @@ class SAM2Segmenter:
         # Map model_id to (yaml_config, checkpoint_filename)
         sam2_cfg = {
             "facebook/sam2.1-hiera-base": ("sam2.1_hiera_b+.yaml", "sam2.1_hiera_base_plus.pt"),
-            "facebook/sam2.1-hiera-large": ("sam2.1_hiera_large.yaml", "sam2.1_hiera_large.pt"),
-            "facebook/sam2.1-hiera-small": ("sam2.1_hiera_s.yaml", "sam2.1_hiera_small.pt"),
+            "facebook/sam2.1-hiera-large": ("sam2.1_hiera_l.yaml", "sam2.1_hiera_large.pt"),
+            "facebook/sam2.1-hiera-small": ("sam2_hiera_s.yaml", "sam2.1_hiera_small.pt"),
             "facebook/sam2.1-hiera-tiny": ("sam2.1_hiera_t.yaml", "sam2.1_hiera_tiny.pt"),
-            # Short aliases
-            "sam2.1_hiera_small": ("sam2.1_hiera_s.yaml", "sam2.1_hiera_small.pt"),
+            # Short aliases — config names use sam2 prefix (not sam2.1) per installed files
+            "sam2.1_hiera_small": ("sam2_hiera_s.yaml", "sam2.1_hiera_small.pt"),
             "sam2.1_hiera_base": ("sam2.1_hiera_b+.yaml", "sam2.1_hiera_base_plus.pt"),
         }
 
