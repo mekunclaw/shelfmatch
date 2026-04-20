@@ -39,6 +39,12 @@ from shelfmatch.pipeline.matcher import (
     FeatureExtractor,
 )
 
+import os
+# Prevent OpenMP/MKL threading conflicts between PyTorch (Grounding DINO) and FAISS on macOS.
+# Both libraries try to use OpenMP but with different runtime configurations.
+os.environ.setdefault("MKL_NUM_THREADS", "1")
+os.environ.setdefault("OMP_NUM_THREADS", "1")
+
 logger = logging.getLogger(__name__)
 
 
