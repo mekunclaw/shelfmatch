@@ -72,8 +72,18 @@ class FeatureExtractor:
             self.model_id = model_id or "google/siglip-base-patch16-224"
         elif model_type == "dinov2":
             self.model_id = model_id or "facebook/dinov2-base"
-        else:
-            raise ValueError(f"Unknown model_type: {model_type}")
+
+    @property
+    def model(self):
+        """Expose the underlying model for fine-tuning."""
+        self._load_model()
+        return self._model
+
+    @property
+    def processor(self):
+        """Expose the processor for pre-processing images."""
+        self._load_model()
+        return self._processor
 
     def _load_model(self):
         if self._model is not None:

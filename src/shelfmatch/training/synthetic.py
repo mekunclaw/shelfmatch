@@ -253,19 +253,19 @@ class SyntheticShelfGenerator:
 
     def generate_dataset(
         self,
+        output_dir: str,
         num_images: int,
         min_products: int = 2,
         max_products: int = 8,
-        output_dir: str,
     ):
         """
         Generate a full synthetic dataset.
 
         Args:
+            output_dir: Where to save images + annotations
             num_images: Number of shelf images to generate
             min_products: Min products per shelf
             max_products: Max products per shelf
-            output_dir: Where to save images + annotations
         """
         out = Path(output_dir)
         images_dir = out / "images"

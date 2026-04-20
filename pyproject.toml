@@ -52,6 +52,8 @@ dependencies = [
     "rich>=13.7.0",
     # Ollama client
     "ollama>=0.1.0",
+    # LoRA fine-tuning
+    "peft>=0.13.0",
 ]
 
 [project.optional-dependencies]
