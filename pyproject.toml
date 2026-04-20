@@ -1,0 +1,92 @@
+[project]
+name = "shelfmatch"
+version = "0.1.0"
+description = "Zero-label retail shelf product detection using open-source foundation models"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "Tim The Dev" }
+]
+keywords = ["retail", "product-detection", "shelf-inspection", "zero-shot", "vision"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Image Recognition",
+]
+
+dependencies = [
+    # Core ML - detection
+    "torch>=2.1.0",
+    "torchvision>=0.16.0",
+    # Transformers for Grounding DINO, OWLv2, SigLIP
+    "transformers>=4.40.0",
+    # Acceleration
+    "accelerate>=0.28.0",
+    # SAM2 for segmentation (install from repo, see README)
+    # "sam2"  # run: pip install git+https://github.com/facebookresearch/sam2
+    # HQ-SAM
+    # "git+https://github.com/SysCV/sam-hq"  # run manually
+    # Vector search
+    "faiss-cpu>=1.8.0",
+    # Image processing
+    "pillow>=10.0.0",
+    "opencv-python>=4.9.0.0",
+    # Web app
+    "gradio>=4.0.0",
+    # HTTP
+    "requests>=2.31.0",
+    "httpx>=0.27.0",
+    # Utilities
+    "numpy>=1.24.0",
+    "scikit-learn>=1.4.0",
+    "tqdm>=4.66.0",
+    "pyyaml>=6.0",
+    "pandas>=2.1.0",
+    # Logging
+    "rich>=13.7.0",
+    # Ollama client
+    "ollama>=0.1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.3.0",
+    "mypy>=1.9.0",
+    "pre-commit>=3.6.0",
+    "jupyter>=1.0.0",
+    "ipykernel>=6.29.0",
+]
+ipynb = [
+    "ipykernel>=6.29.0",
+    "matplotlib>=3.8.0",
+    "seaborn>=0.13.0",
+]
+
+[project.scripts]
+shelfmatch = "shelfmatch.cli:main"
+shelfmatch-web = "shelfmatch.webapp.main:main"
+shelfmatch-orchestrate = "shelfmatch.orchestrator.main:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+select = ["E", "F", "I", "N", "W", "UP"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_ignores = true
+ignore_missing_imports = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/shelfmatch"]
